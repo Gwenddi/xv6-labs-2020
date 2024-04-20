@@ -440,3 +440,29 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+
+// part 1 begin
+// print page tage
+static char* prefix[3] = {"..", ".. ..", ".. .. .."};
+void vmprint(pagetable_t pagetable) {
+  printf("page table %p\n", pagetable);
+  vmprint_rec(pagetable, 0);
+}
+
+void vmprint_rec(pagetable_t pagetable, int l) {
+  if (l > 2) {
+    return;
+  }
+  // 一共有2^9 = 512 PTEs页表项在一个页表中
+  for (int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+    // 合法则继续遍历
+    if (pte & PTE_V) {
+      uint64 pa = PTE2PA(pte);
+      printf("%s%d: pte %p pa %p\n", prefix[l], i, pte, pa);
+      vmprint_rec((pagetable_t)pa, l + 1);
+    }
+  }
+}
+// part 1 end
